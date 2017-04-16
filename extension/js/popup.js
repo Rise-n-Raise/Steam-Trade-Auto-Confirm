@@ -22,9 +22,50 @@
 		localStorage.setItem('IdentitySectet', IdentitySectet);
 	}
 	if (localStorage.getItem('scan') == 'true') document.getElementsByTagName('input')[0].checked = true;
-	document.getElementsByTagName('input')[1].value = localStorage.getItem('steamid');
-	document.getElementsByTagName('input')[2].value = decodeURIComponent(localStorage.getItem('IdentitySectet'));
-
+	document.getElementsByTagName('input')[2].value = localStorage.getItem('steamid');
+	document.getElementsByTagName('input')[3].value = decodeURIComponent(localStorage.getItem('IdentitySectet'));
+	
+	var check_rate = parseInt(localStorage.getItem('rate'));
+	if(!isNaN(check_rate))
+	{
+		if(check_rate < 1000)
+		{
+			check_rate = 1000;
+		}
+		else if(check_rate > 60000)
+		{
+			check_rate = 60000;
+		}
+	}
+	else
+	{
+		check_rate = 10000;
+	}
+	if(check_rate != localStorage.getItem('rate'))
+		localStorage.setItem('rate', check_rate);
+	$('#rate').val(check_rate);
+	$('#rate').change( function()
+	{
+		var set_rate = parseInt($(this).val());
+		if(!isNaN(set_rate))
+		{
+			if(set_rate < 1000)
+			{
+				set_rate = 1000;
+			}
+			else if(set_rate > 60000)
+			{
+				set_rate = 60000;
+			}
+		}
+		else
+		{
+			set_rate = 10000;
+		}
+		localStorage.setItem('rate', set_rate);
+		$('#rate').val(set_rate);
+	});
+	
 	document.addEventListener("change", function(e)
 	{
 		localStorage.removeItem('scan');
@@ -37,16 +78,16 @@
 			document.getElementsByTagName('input')[0].checked == false;
 			localStorage.setItem('scan', 'false');
 		}
-		var checker = parseInt(document.getElementsByTagName('input')[1].value);
+		var checker = parseInt(document.getElementsByTagName('input')[2].value);
 		if (isNaN (checker))
 		{
-			document.getElementsByTagName('input')[1].value = "";
+			document.getElementsByTagName('input')[2].value = "";
 		}
 		localStorage.removeItem('steamid');
-		localStorage.setItem('steamid', document.getElementsByTagName('input')[1].value);
+		localStorage.setItem('steamid', document.getElementsByTagName('input')[2].value);
 		localStorage.removeItem('IdentitySectet');
-		localStorage.setItem('IdentitySectet', encodeURIComponent(document.getElementsByTagName('input')[2].value));
-		if((document.getElementsByTagName('input')[2].value == "") || (document.getElementsByTagName('input')[1].value == ""))
+		localStorage.setItem('IdentitySectet', encodeURIComponent(document.getElementsByTagName('input')[3].value));
+		if((document.getElementsByTagName('input')[3].value == "") || (document.getElementsByTagName('input')[2].value == ""))
 		{
 			localStorage.removeItem('scan');
 			localStorage.setItem('scan', 'false');

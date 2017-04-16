@@ -24,7 +24,7 @@ chrome.notifications.onClicked.addListener(function (notificationId) {
 	chrome.notifications.clear( notificationId, function () { });
 });
 
-setTimeout(newsNow, 30000);
+/*setTimeout(newsNow, 30000);
 function newsNow()
 {
 	var options = {
@@ -34,9 +34,9 @@ function newsNow()
 	iconUrl: 'images/icon128.png'
 	};
 	chrome.notifications.create( "openNewsNow", options, function (id) { });
-}
+}*/
 
-setTimeout(connection, "500");
+//setTimeout(connection, 500);
 tradeauth();
 function tradeauth()
 {
@@ -77,7 +77,7 @@ function tradeauth()
 		{
 			if(xhr.readyState == 4)
 			{
-				if(xhr.status == 200 && xhr.responseText != undefined && xhr.responseText != '')
+				if(xhr.status == 200 && xhr.responseText)
 				{
 					var conflongkey = ('' + xhr.responseText).split('-X-');
 					var longkey = conflongkey[0].replace(/\+/gim, '%2B'); //.replace(/\%2B/gim, '+').replace(/\%2b/gim, '+');
@@ -92,7 +92,7 @@ function tradeauth()
 					{
 						if (xhr.readyState == 4)
 						{
-							if(xhr.responseText)
+							if(xhr.status == 200 && xhr.responseText)
 							{
 								var data = xhr.responseText;
 								var ohno = $('.mobileconf_done:eq(0)', data).text();
@@ -101,7 +101,7 @@ function tradeauth()
 								var usuallen = data.length;
 								if ((ohno == "") && (errorlen >= usuallen))
 								{
-									if((!(/(.*)(\-)(.)(\-)(.)(\-)(.*)/g.test($('#mobileconf_empty', data).text()))) && (xhr.status == 200))
+									if(!(/(.*)(\-)(.)(\-)(.)(\-)(.*)/g.test($('#mobileconf_empty', data).text())))
 									{
 										var options = {
 											type: "basic",
@@ -118,7 +118,7 @@ function tradeauth()
 										var options = {
 											type: "basic",
 											title: "Ops!",
-											message: "Data loading failed!\nSimple Steam error or somesing wrong. May be it is not your steamID?",
+											message: "Data loading failed!\nSimple Steam error or something wrong. May be it is not your steamID?",
 											iconUrl: 'images/icon128.png'
 										};
 										//conferror.play();
@@ -137,14 +137,20 @@ function tradeauth()
 								}
 								else
 								{
-									setTimeout(tradeauth, "10000");
+									setTimeout(tradeauth, localStorage.getItem('rate'));
 								}
+							}
+							else if(xhr.status == 429)
+							{
+								chrome.runtime.sendMessage('msg:Error 429. Too many requests.');
+								setTimeout(tradeauth, 5000);
 							}
 							else
 							{
-								chrome.browserAction.setBadgeBackgroundColor({ color: '#602B6D'});
-								chrome.browserAction.setBadgeText({ text: "Error"});
-								setTimeout(tradeauth, "5000");
+								/*chrome.browserAction.setBadgeBackgroundColor({ color: '#602B6D'});
+								chrome.browserAction.setBadgeText({ text: "Error"});*/
+								chrome.runtime.sendMessage('msg:Error ' + xhr.status + '.');
+								setTimeout(tradeauth, localStorage.getItem('rate'));
 							}
 						}
 					}
@@ -153,20 +159,20 @@ function tradeauth()
 				{
 					chrome.browserAction.setBadgeBackgroundColor({ color: '#602B6D'});
 					chrome.browserAction.setBadgeText({ text: "Error"});
-					setTimeout(tradeauth, "5000");
+					setTimeout(tradeauth, localStorage.getItem('rate'));
 				}
 			}
 		}
 	}
-	if ((scan == 'false') || (localStorage.getItem('sub') != 'true'))
+	else //if((scan == 'false') || (localStorage.getItem('sub') != 'true'))
 	{
 		chrome.browserAction.setBadgeBackgroundColor({ color: '#FF0000'});
 		chrome.browserAction.setBadgeText({ text: "Off"});
-		setTimeout(tradeauth, "2000");
+		setTimeout(tradeauth, 2000);
 	}
 }
 
-function connection()
+/*function connection()
 {
 	var ifscan = localStorage.getItem('scan');
 	var extensionID1 = "imbneijeenaegfmglkkigjdeelcnopbi"; //for PUBLISHED MarketDota2 and Csgo.tm Trade Helper
@@ -181,13 +187,13 @@ function connection()
 		chrome.runtime.sendMessage(extensionID1, {data: 'connectionFalse'});
 		//chrome.runtime.sendMessage(extensionID2, {data: 'connectionFalse'});
 	}
-	setTimeout(connection, "2000");
-}
+	setTimeout(connection, 2000);
+}*/
 
 chrome.tabs.onRemoved.addListener( function(tabId, removeInfo)
 {
 	var truetabid = localStorage.getItem('tabidremove');
-	if (tabId == truetabid) setTimeout(tradeauth, "10000");
+	if (tabId == truetabid) setTimeout(tradeauth, localStorage.getItem('rate'));
 });
 
 localStorage.removeItem('subloadin');
@@ -197,98 +203,128 @@ localStorage.removeItem('sub');
 chrome.storage.sync.set({'tradeConfirmer': 'false'});
 chrome.runtime.onMessage.addListener( function(response, sender, senDresponse)
 {
-	if(response == 'getFastKey')
+	if(typeof response == 'string')
 	{
-		var telltoTab = localStorage.getItem('tabidremove');
-		telltoTab = parseInt(telltoTab);
-		var timeIs = new Date();
-		timeIs = timeIs.getTime() / 1000 | 0;
-		xhr = new XMLHttpRequest();
-		xhr.open("GET", "http://83.220.175.150:37999/createhashes/?t=" + timeIs + "&s=" + localStorage.getItem('IdentitySectet'), true);
-		xhr.send(null);
-		xhr.onreadystatechange = function()
+		if(/^msg\:/.test(response))
 		{
-			if (xhr.readyState == 4)
+			var options =
 			{
-				if(xhr.responseText)
+				type: "basic",
+				title: "Steam Trade Auto Confirm",
+				message: response.replace(/^msg\:/, ''),
+				iconUrl: 'images/icon128.png'
+			};
+			chrome.notifications.clear( 'msg', function () { });
+			chrome.notifications.create( 'msg', options, function (id) { });
+			setTimeout(tradeauth, 15000);
+		}
+		else if(/^audioMsg\:/.test(response))
+		{
+			var options =
+			{
+				type: "basic",
+				title: "Steam Trade Auto Confirm",
+				message: response.replace(/^audioMsg\:/, ''),
+				iconUrl: 'images/icon128.png'
+			};
+			conferror.play();
+			chrome.notifications.clear( 'audioMsg', function () { });
+			chrome.notifications.create( 'audioMsg', options, function (id) { });
+			setTimeout(tradeauth, 15000);
+		}
+		else if(response == 'getFastKey')
+		{
+			var telltoTab = localStorage.getItem('tabidremove');
+			telltoTab = parseInt(telltoTab);
+			var timeIs = new Date();
+			timeIs = timeIs.getTime() / 1000 | 0;
+			xhr = new XMLHttpRequest();
+			xhr.open("GET", "http://83.220.175.150:37999/createhashes/?t=" + timeIs + "&s=" + localStorage.getItem('IdentitySectet'), true);
+			xhr.send(null);
+			xhr.onreadystatechange = function()
+			{
+				if (xhr.readyState == 4)
 				{
-					var fastkey = ('' + xhr.responseText).replace(/(\-X\-)(.*)/g, '');
-					chrome.tabs.sendMessage(telltoTab, {data: fastkey, timeIs : timeIs});
-				}
-				else
-				{
-					chrome.browserAction.setBadgeBackgroundColor({ color: '#602B6D'});
-					chrome.browserAction.setBadgeText({ text: "Error"});
-					chrome.tabs.sendMessage(telltoTab, {data: "netError"});
+					if(xhr.responseText)
+					{
+						var fastkey = ('' + xhr.responseText).replace(/(\-X\-)(.*)/g, '');
+						chrome.tabs.sendMessage(telltoTab, {data: fastkey, timeIs : timeIs});
+					}
+					else
+					{
+						chrome.browserAction.setBadgeBackgroundColor({ color: '#602B6D'});
+						chrome.browserAction.setBadgeText({ text: "Error"});
+						chrome.tabs.sendMessage(telltoTab, {data: "netError"});
+					}
 				}
 			}
 		}
-	}
-	else if(response == 'getConfData')
-	{
-		chrome.tabs.sendMessage(sender.tab.id, 
+		else if(response == 'getConfData')
 		{
-			devhash: g_devhash,
-			steamID : g_steamID,
-			timeforlongkey : g_timeforlongkey,
-			longkey : g_longkey,
-			identity_secret : g_identity_secret,
-		});
-	}
-	else if(response == 'subscription')
-	{
-		localStorage.removeItem('subloadin');
-		localStorage.removeItem('accountMail');
-		localStorage.removeItem('days');
-		localStorage.removeItem('sub');
-		localStorage.setItem('subloadin', 'ongoing');
-		var subcheck = new XMLHttpRequest();
-		subcheck.open("GET", "http://extensions.risenraise.com/profile/", true);
-		subcheck.send(null);
-		subcheck.onreadystatechange = function()
-		{
-			if(subcheck.readyState == 4)
+			chrome.tabs.sendMessage(sender.tab.id, 
 			{
-				if(subcheck.responseText && subcheck.status == 200)
+				devhash: g_devhash,
+				steamID : g_steamID,
+				timeforlongkey : g_timeforlongkey,
+				longkey : g_longkey,
+				identity_secret : g_identity_secret,
+			});
+		}
+		else if(response == 'subscription')
+		{
+			localStorage.removeItem('subloadin');
+			localStorage.removeItem('accountMail');
+			localStorage.removeItem('days');
+			localStorage.removeItem('sub');
+			localStorage.setItem('subloadin', 'ongoing');
+			var subcheck = new XMLHttpRequest();
+			subcheck.open("GET", "http://extensions.risenraise.com/profile/", true);
+			subcheck.send(null);
+			subcheck.onreadystatechange = function()
+			{
+				if(subcheck.readyState == 4)
 				{
-					var data = subcheck.responseText;
-					var email = $('#email', data).text();
-					if(email != '')
+					if(subcheck.responseText && subcheck.status == 200)
 					{
-						var subDays = $('span[name="Steam Trade Auto Confirm"]', data).text();
-						if(subDays == '')
+						var data = subcheck.responseText;
+						var email = $('#email', data).text();
+						if(email != '')
 						{
-							subDays = $('span[name="Opskins Trade Helper"]', data).text();
-						}
-						if((subDays != undefined) && (subDays != '') && (parseInt(subDays) >= 0))
-						{
-							if(subDays == '0') subDays = 1;
-							var subscription = 'true';
-							chrome.storage.sync.set({'tradeConfirmer': subscription});
-							setTimeout(SubscriptionCirckle, 1800000);
+							var subDays = $('span[name="Steam Trade Auto Confirm"]', data).text();
+							if(subDays == '')
+							{
+								subDays = $('span[name="Opskins Trade Helper"]', data).text();
+							}
+							if((subDays != undefined) && (subDays != '') && (parseInt(subDays) >= 0))
+							{
+								if(subDays == '0') subDays = 1;
+								var subscription = 'true';
+								chrome.storage.sync.set({'tradeConfirmer': subscription});
+								setTimeout(SubscriptionCirckle, 1800000);
+							}
+							else
+							{
+								var subscription = 'false';
+								subDays = '0';
+							}
+							localStorage.setItem('accountMail', email);
+							localStorage.setItem('days', subDays);
+							localStorage.setItem('sub', subscription);
 						}
 						else
 						{
 							var subscription = 'false';
-							subDays = '0';
+							var subDays = '0';
+							localStorage.setItem('accountMail', email);
+							localStorage.setItem('sub', subscription);
+							localStorage.setItem('days', subDays);
 						}
-						localStorage.setItem('accountMail', email);
-						localStorage.setItem('days', subDays);
-						localStorage.setItem('sub', subscription);
+						localStorage.removeItem('subloadin');
 					}
 					else
 					{
-						var subscription = 'false';
-						var subDays = '0';
-						localStorage.setItem('accountMail', email);
-						localStorage.setItem('sub', subscription);
-						localStorage.setItem('days', subDays);
+						localStorage.removeItem('subloadin');
 					}
-					localStorage.removeItem('subloadin');
-				}
-				else
-				{
-					localStorage.removeItem('subloadin');
 				}
 			}
 		}
