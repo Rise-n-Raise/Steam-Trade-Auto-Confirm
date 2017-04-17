@@ -1,40 +1,34 @@
 ﻿try
 {
 	var devhash;
-	var steamID;
+	var steamId;
 	var timeforlongkey;
 	var longkey;
 	var identity_secret;
 	$('document').ready(function()
 	{
-		chrome.storage.sync.get('tradeConfirmer', function(dataIs)
+		if((("" + document.location).indexOf("mobileconf")) > (-1))
 		{
-			if(dataIs.tradeConfirmer == 'true')
+			function getConfData(response, sender, sendResponse)
 			{
-				if((("" + document.location).indexOf("mobileconf")) > (-1))
-				{
-					function getConfData(response, sender, sendResponse)
-					{
-						devhash = response.devhash;
-						steamID = response.steamID;
-						timeforlongkey = response.timeforlongkey;
-						longkey = response.longkey;
-						identity_secret = response.identity_secret;
-						chrome.runtime.onMessage.removeListener(getConfData);
-						startrequest();
-					}
-					chrome.runtime.onMessage.addListener(getConfData);
-					chrome.runtime.sendMessage('getConfData');
-				}
+				devhash = response.devhash;
+				steamId = response.steamId;
+				timeforlongkey = response.timeforlongkey;
+				longkey = response.longkey;
+				identity_secret = response.identity_secret;
+				chrome.runtime.onMessage.removeListener(getConfData);
+				startrequest();
 			}
-		});
+			chrome.runtime.onMessage.addListener(getConfData);
+			chrome.runtime.sendMessage('getConfData');
+		}
 	});
 	function startrequest()
 	{
 		var i = 0;
 		var listsize = $('.mobileconf_list_entry').size();
-		opCircle(i, listsize, devhash, steamID, timeforlongkey, longkey, identity_secret);
-		function opCircle(i, listsize, devhash, steamID, timeforlongkey, longkey, identity_secret)
+		opCircle(i, listsize, devhash, steamId, timeforlongkey, longkey, identity_secret);
+		function opCircle(i, listsize, devhash, steamId, timeforlongkey, longkey, identity_secret)
 		{
 			if(i < listsize)
 			{
@@ -42,7 +36,7 @@
 				var confirmationID = $('.mobileconf_list_entry:eq(' + i + ')').attr('data-confid');
 				if ((confirmationKey != undefined) && (confirmationID != undefined))
 				{
-					var link = "https://steamcommunity.com/mobileconf/ajaxop?op=allow&p=" + devhash + "&a=" + steamID + "&k=" + longkey + "&t=" + timeforlongkey + "&m=android&tag=allow&cid=" + confirmationID + "&ck=" + confirmationKey;
+					var link = "https://steamcommunity.com/mobileconf/ajaxop?op=allow&p=" + devhash + "&a=" + steamId + "&k=" + longkey + "&t=" + timeforlongkey + "&m=android&tag=allow&cid=" + confirmationID + "&ck=" + confirmationKey;
 					var randtime = Math.floor((Math.random() * 1000) + 1000);
 					i++;
 					if(i == 1)
@@ -57,7 +51,7 @@
 								if(xhr.responseText)
 								{
 									if(!(i < listsize)) window.close();
-										setTimeout(opCircle, randtime, i, listsize, devhash, steamID, timeforlongkey, longkey, identity_secret);
+										setTimeout(opCircle, randtime, i, listsize, devhash, steamId, timeforlongkey, longkey, identity_secret);
 								}
 								else
 								{
@@ -77,7 +71,7 @@
 							{
 								window.close();
 							}
-							var link = "https://steamcommunity.com/mobileconf/ajaxop?op=allow&p=" + devhash + "&a=" + steamID + "&k=" + sendedHash + "&t=" + response.timeIs + "&m=android&tag=allow&cid=" + confirmationID + "&ck=" + confirmationKey;
+							var link = "https://steamcommunity.com/mobileconf/ajaxop?op=allow&p=" + devhash + "&a=" + steamId + "&k=" + sendedHash + "&t=" + response.timeIs + "&m=android&tag=allow&cid=" + confirmationID + "&ck=" + confirmationKey;
 							xhr = new XMLHttpRequest();
 							xhr.open("GET", link, true);
 							xhr.send(null);
@@ -88,7 +82,7 @@
 									if(xhr.responseText)
 									{
 										if(!(i < listsize)) window.close();
-										setTimeout(opCircle, randtime, i, listsize, devhash, steamID, timeforlongkey, longkey, identity_secret);
+										setTimeout(opCircle, randtime, i, listsize, devhash, steamId, timeforlongkey, longkey, identity_secret);
 									}
 									else
 									{

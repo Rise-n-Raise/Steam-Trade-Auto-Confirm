@@ -1,29 +1,30 @@
-﻿$('document').ready( function()
+﻿function preLoader()
 {
 	var scan = localStorage.getItem('scan');
-	if (scan == undefined )
+	if(localStorage.getItem('scan') == 'true')
+		$('#buttononoff')[0].checked = true;
+	else
 	{
-		localStorage.removeItem('scan');
+		$('#buttononoff')[0].checked = false;
 		scan = 'false';
 		localStorage.setItem('scan', scan);
 	}
-	var steamid = localStorage.getItem('steamid');
-	if ((steamid == undefined) || (steamid == ""))
+	
+	var steamId = localStorage.getItem('steamId');
+	if (steamId == undefined)
 	{
-		localStorage.removeItem('steamid');
-		steamid = '';
-		localStorage.setItem('steamid', steamid);
+		steamId = '';
+		localStorage.setItem('steamId', steamId);
 	}
-	var IdentitySectet = localStorage.getItem('IdentitySectet');
-	if ((IdentitySectet == undefined) || (IdentitySectet == ""))
+	$('#steamId')[0].value = steamId;
+	
+	var identitySecret = localStorage.getItem('identitySecret');
+	if(identitySecret == undefined)
 	{
-		localStorage.removeItem('IdentitySectet');
-		IdentitySectet = '';
-		localStorage.setItem('IdentitySectet', IdentitySectet);
+		identitySecret = '';
+		localStorage.setItem('identitySecret', identitySecret);
 	}
-	if (localStorage.getItem('scan') == 'true') document.getElementsByTagName('input')[0].checked = true;
-	document.getElementsByTagName('input')[2].value = localStorage.getItem('steamid');
-	document.getElementsByTagName('input')[3].value = decodeURIComponent(localStorage.getItem('IdentitySectet'));
+	$('#identitySecret')[0].value = decodeURIComponent(identitySecret);
 	
 	var check_rate = parseInt(localStorage.getItem('rate'));
 	if(!isNaN(check_rate))
@@ -44,122 +45,79 @@
 	if(check_rate != localStorage.getItem('rate'))
 		localStorage.setItem('rate', check_rate);
 	$('#rate').val(check_rate);
+}
+
+function listeners()
+{
+	$('#buttononoff').change( function()
+	{
+		if(this.checked == true && $('#identitySecret')[0].value && $('#steamId')[0].value)
+		{
+			localStorage.setItem('scan', 'true');
+			chrome.browserAction.setBadgeBackgroundColor({ color: '#B9FF00'});
+			chrome.browserAction.setBadgeText({ text: "On"});
+		}
+		else
+		{
+			if(!$('#identitySecret')[0].value && !$('#steamId')[0].value)
+				chrome.runtime.sendMessage('msg:No steamId and identitySecret.');
+			else if(!$('#steamId')[0].value)
+				chrome.runtime.sendMessage('msg:No steamId.');
+			else if(!$('#identitySecret')[0].value)
+				chrome.runtime.sendMessage('msg:No identitySecret.');
+			this.checked = false;
+			localStorage.setItem('scan', 'false');
+			chrome.browserAction.setBadgeBackgroundColor({ color: '#FF0000'});
+			chrome.browserAction.setBadgeText({ text: "Off"});
+		}
+	});
+	
 	$('#rate').change( function()
 	{
-		var set_rate = parseInt($(this).val());
+		var set_rate = parseInt(this.value);
 		if(!isNaN(set_rate))
 		{
 			if(set_rate < 1000)
 			{
 				set_rate = 1000;
 			}
-			else if(set_rate > 60000)
+			else if(set_rate > 20000)
 			{
-				set_rate = 60000;
+				set_rate = 20000;
 			}
 		}
 		else
 		{
-			set_rate = 10000;
+			set_rate = 5000;
 		}
 		localStorage.setItem('rate', set_rate);
 		$('#rate').val(set_rate);
 	});
 	
-	document.addEventListener("change", function(e)
+	$('#steamId, #identitySecret').change( function()
 	{
-		localStorage.removeItem('scan');
-		if((document.getElementsByTagName('input')[0].checked == true) && (localStorage.getItem('sub') == 'true'))
+		var steamId = parseInt($('#steamId')[0].value);
+		if (isNaN(steamId))
 		{
-			localStorage.setItem('scan', 'true');
+			steamId = '';
+			$('#steamId')[0].value = steamId;
 		}
-		else
+		localStorage.setItem('steamId', steamId);
+		
+		var identitySecret = $('#identitySecret')[0].value;
+		localStorage.setItem('identitySecret', encodeURIComponent(identitySecret));
+		if(!identitySecret || !steamId)
 		{
-			document.getElementsByTagName('input')[0].checked == false;
+			$('#buttononoff')[0].checked = false;
 			localStorage.setItem('scan', 'false');
-		}
-		var checker = parseInt(document.getElementsByTagName('input')[2].value);
-		if (isNaN (checker))
-		{
-			document.getElementsByTagName('input')[2].value = "";
-		}
-		localStorage.removeItem('steamid');
-		localStorage.setItem('steamid', document.getElementsByTagName('input')[2].value);
-		localStorage.removeItem('IdentitySectet');
-		localStorage.setItem('IdentitySectet', encodeURIComponent(document.getElementsByTagName('input')[3].value));
-		if((document.getElementsByTagName('input')[3].value == "") || (document.getElementsByTagName('input')[2].value == ""))
-		{
-			localStorage.removeItem('scan');
-			localStorage.setItem('scan', 'false');
-			document.getElementsByTagName('input')[0].checked = false;
-		}
-		if (document.getElementsByTagName('input')[0].checked == true)
-		{
-			chrome.browserAction.setBadgeBackgroundColor({ color: '#B9FF00'});
-			chrome.browserAction.setBadgeText({ text: "On"});
-		}
-	});
-	$('#buttononoff').click( function()
-	{
-		if((document.getElementsByTagName('input')[0].checked == false) || (localStorage.getItem('sub') != 'true'))
-		{
-			document.getElementsByTagName('input')[0].checked = false;
 			chrome.browserAction.setBadgeBackgroundColor({ color: '#FF0000'});
 			chrome.browserAction.setBadgeText({ text: "Off"});
 		}
 	});
-	if(localStorage.getItem('sub') != "true")
-	{
-		if(localStorage.getItem('subloadin') == 'ongoing')
-		{
-			document.getElementById('subBut').disabled = true;
-			$('#subBut').text('Checking.');
-			setTimeout(waiter, 750);
-		}
-		$('#subBut').click( function()
-		{
-			if(localStorage.getItem('subloadin') != 'ongoing')
-			{
-				document.getElementById('subBut').disabled = true;
-				$('#subBut').text('Checking.');
-				setTimeout(waiter, 750);
-				chrome.runtime.sendMessage("subscription");
-			}
-		});
-	}
-	else
-	{
-		waiter();
-	}
-});
-
-function waiter()
-{
-	var subka = localStorage.getItem('subloadin');
-	if(subka == 'ongoing')
-	{
-		if($('#subBut').text() == 'Checking...')
-			$('#subBut').text('Checking.');
-		else
-			$('#subBut').text($('#subBut').text() + '.');
-		setTimeout(waiter, 750);
-	}
-	else
-	{
-		var oneTime = 0;
-		onLoaded();
-		function onLoaded()
-		{
-			if((localStorage.getItem('accountMail') == undefined) || (localStorage.getItem('accountMail') == ''))
-			{
-				$('.subscription').html('<a target="_blank" href="http://extensions.risenraise.com/accounts/login/" ><span align="center"><font size="4" align="center">login</font></span></a>');
-				oneTime++;
-				if(oneTime < 20) setTimeout(onLoaded, 200);
-			}
-			else
-			{
-				$('.subscription').html('<a target="_blank" href="http://extensions.risenraise.com/profile/" ><div align="center"><span style="font-size: 12pt;" align="center">' + localStorage.getItem('accountMail') + '</span></a><span> days: ' + localStorage.getItem('days') + '</span></div></a>');
-			}
-		}
-	}
 }
+
+$('document').ready( function()
+{
+	preLoader();
+	listeners();
+});
