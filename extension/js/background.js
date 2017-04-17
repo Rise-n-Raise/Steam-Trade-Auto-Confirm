@@ -25,8 +25,8 @@ chrome.notifications.onClicked.addListener(function (notificationId)
 	chrome.notifications.clear( notificationId, function () { });
 });
 
-tradeauth();
-function tradeauth()
+circle();
+function circle()
 {
 	var scan = localStorage.getItem('scan');
 	var steamId = localStorage.getItem('steamId');
@@ -53,7 +53,7 @@ function tradeauth()
 				xhrDone = true;
 				chrome.browserAction.setBadgeBackgroundColor({ color: '#602B6D'});
 				chrome.browserAction.setBadgeText({ text: "Error"});
-				setTimeout(tradeauth, 0);
+				setTimeout(circle, 0);
 			}
 		}
 		xhr.error = function()
@@ -63,7 +63,7 @@ function tradeauth()
 				xhrDone = true;
 				chrome.browserAction.setBadgeBackgroundColor({ color: '#602B6D'});
 				chrome.browserAction.setBadgeText({ text: "Error"});
-				setTimeout(tradeauth, localStorage.getItem('rate'));
+				setTimeout(circle, localStorage.getItem('rate'));
 			}
 		}
 		xhr.onreadystatechange = function()
@@ -91,7 +91,7 @@ function tradeauth()
 							reqDone = true;
 							chrome.browserAction.setBadgeBackgroundColor({ color: '#602B6D'});
 							chrome.browserAction.setBadgeText({ text: "Error"});
-							setTimeout(tradeauth, 0);
+							setTimeout(circle, 0);
 						}
 					}
 					req.error = function()
@@ -101,7 +101,7 @@ function tradeauth()
 							reqDone = true;
 							chrome.browserAction.setBadgeBackgroundColor({ color: '#602B6D'});
 							chrome.browserAction.setBadgeText({ text: "Error"});
-							setTimeout(tradeauth, localStorage.getItem('rate'));
+							setTimeout(circle, localStorage.getItem('rate'));
 						}
 					}
 					req.onreadystatechange = function()
@@ -137,20 +137,22 @@ function tradeauth()
 								}
 								else
 								{
-									setTimeout(tradeauth, localStorage.getItem('rate'));
+									setTimeout(circle, localStorage.getItem('rate'));
 								}
 							}
 							else if(req.status == 429)
 							{
 								chrome.runtime.sendMessage('msg:Error 429. Too many requests.');
-								setTimeout(tradeauth, 5000);
+								chrome.browserAction.setBadgeBackgroundColor({ color: '#602B6D'});
+								chrome.browserAction.setBadgeText({ text: "Error"});
+								setTimeout(circle, 5000);
 							}
 							else
 							{
 								chrome.browserAction.setBadgeBackgroundColor({ color: '#602B6D'});
 								chrome.browserAction.setBadgeText({ text: "Error"});
 								chrome.runtime.sendMessage('msg:Error ' + req.status + '.');
-								setTimeout(tradeauth, localStorage.getItem('rate'));
+								setTimeout(circle, localStorage.getItem('rate'));
 							}
 						}
 					}
@@ -159,7 +161,7 @@ function tradeauth()
 				{
 					chrome.browserAction.setBadgeBackgroundColor({ color: '#602B6D'});
 					chrome.browserAction.setBadgeText({ text: "Error"});
-					setTimeout(tradeauth, localStorage.getItem('rate'));
+					setTimeout(circle, localStorage.getItem('rate'));
 				}
 			}
 		}
@@ -169,7 +171,7 @@ function tradeauth()
 		localStorage.setItem('scan', 'false');
 		chrome.browserAction.setBadgeBackgroundColor({ color: '#FF0000'});
 		chrome.browserAction.setBadgeText({ text: "Off"});
-		setTimeout(tradeauth, 2000);
+		setTimeout(circle, 2000);
 	}
 }
 
@@ -178,7 +180,7 @@ chrome.tabs.onRemoved.addListener( function(tabId, removeInfo)
 	var truetabid = localStorage.getItem('tabidremove');
 	localStorage.removeItem('tabidremove');
 	if (tabId == truetabid)
-		setTimeout(tradeauth, localStorage.getItem('rate'));
+		setTimeout(circle, localStorage.getItem('rate'));
 });
 
 function makeRandomString(numb)
@@ -205,7 +207,6 @@ chrome.runtime.onMessage.addListener( function(response, sender, senDresponse)
 			};
 			chrome.notifications.clear( 'msg', function () { });
 			chrome.notifications.create( 'msg', options, function (id) { });
-			setTimeout(tradeauth, 15000);
 		}
 		else if(/^audioMsg\:/.test(response))
 		{
@@ -219,7 +220,6 @@ chrome.runtime.onMessage.addListener( function(response, sender, senDresponse)
 			conferror.play();
 			chrome.notifications.clear( 'audioMsg', function () { });
 			chrome.notifications.create( 'audioMsg', options, function (id) { });
-			setTimeout(tradeauth, 15000);
 		}
 		else if(response == 'getFastKey')
 		{
