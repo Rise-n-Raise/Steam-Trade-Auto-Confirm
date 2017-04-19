@@ -96,8 +96,8 @@ function listeners()
 	
 	$('#steamId, #identitySecret').change( function()
 	{
-		var steamId = parseInt($('#steamId')[0].value);
-		if (isNaN(steamId))
+		var steamId = $('#steamId')[0].value;
+		if (/[^0-9]/.test(steamId))
 		{
 			steamId = '';
 			$('#steamId')[0].value = steamId;
