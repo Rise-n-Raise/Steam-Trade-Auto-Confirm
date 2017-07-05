@@ -3,8 +3,8 @@
 
 	"name": "Steam Trade Auto Confirm",
 	"short_name": "STAC",
-	"version": "1.4.0",
-	"description": "Automates all SteamGuard mobile confirmations(SteamCommunity Market sales and tradeoffers.",
+	"version": "1.4.1",
+	"description": "Automates all SteamGuard mobile-stage confirmations(SteamCommunity Market lots and tradeoffers).",
 
 	"permissions": [
 		"cookies",
@@ -24,25 +24,19 @@
 	"content_scripts": [
 		{
 			"matches": [
-			"http://steamcommunity.com/*",
-			"http://*.steamcommunity.com/*",
-			"https://steamcommunity.com/*",
-			"http://*.risenraise.com/*",
-			"https://*.steamcommunity.com/*"
-		],
+				"http://steamcommunity.com/*",
+				"http://*.steamcommunity.com/*",
+				"https://steamcommunity.com/*",
+				"http://*.risenraise.com/*",
+				"https://*.steamcommunity.com/*"
+			],
 
-		"js": ["js/jquery.js", "js/cookie.js", "js/steamauth.js"]
-	],
-	
-	"content_scripts": [ 
-		{ 
-			"matches": ["*://*.opskins.com/*"], 
-			"js": ["js/ops.js"] 
-		} 
+			"js": ["js/jquery.js", "js/cookie.js", "js/steamauth.js"]
+		}
 	],
 	
 	"background": {
-		"scripts": ["js/jquery.js", "js/cookie.js", "js/react.min.js", "js/background.js"]
+		"scripts": ["js/jquery.js", "js/cookie.js", "js/background.js"]
 	},
 	
 	"browser_action": {

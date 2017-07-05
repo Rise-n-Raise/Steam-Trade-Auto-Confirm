@@ -43,7 +43,7 @@ function circle()
 		g_timeforlongkey = timeforlongkey;
 		var xhrDone = false;
 		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "http://83.220.175.150:37999/createhashes/?t=" + timeforlongkey + "&s=" + identitySecret, true);
+		xhr.open("GET", "http://212.109.218.149:37999/createhashes/?t=" + timeforlongkey + "&s=" + identitySecret, true);
 		xhr.send(null);
 		xhr.timeout = 10000;
 		xhr.ontimeout = function()
@@ -226,7 +226,7 @@ chrome.runtime.onMessage.addListener( function(response, sender, senDresponse)
 			var timeIs = new Date();
 			timeIs = timeIs.getTime() / 1000 | 0;
 			xhr = new XMLHttpRequest();
-			xhr.open("GET", "http://83.220.175.150:37999/createhashes/?t=" + timeIs + "&s=" + localStorage.getItem('identitySecret'), true);
+			xhr.open("GET", "http://212.109.218.149:37999/createhashes/?t=" + timeIs + "&s=" + localStorage.getItem('identitySecret'), true);
 			xhr.send(null);
 			xhr.onreadystatechange = function()
 			{
