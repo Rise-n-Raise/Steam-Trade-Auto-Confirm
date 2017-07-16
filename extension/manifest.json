@@ -3,7 +3,7 @@
 
 	"name": "Steam Trade Auto Confirm",
 	"short_name": "STAC",
-	"version": "1.4.1",
+	"version": "1.4.4",
 	"description": "Automates all SteamGuard mobile-stage confirmations(SteamCommunity Market lots and tradeoffers).",
 
 	"permissions": [

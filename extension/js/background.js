@@ -1,6 +1,5 @@
 ﻿localStorage.removeItem('scan');
 localStorage.setItem('scan', 'false');
-localStorage.removeItem('tabidremove');
 
 var conferror = new Audio();
 conferror.preload = 'auto';
@@ -15,6 +14,7 @@ var g_steamId;
 var g_timeforlongkey;
 var g_longkey;
 var g_identity_secret;
+var g_tabidremove;
 
 chrome.notifications.onClicked.addListener(function (notificationId)
 {
@@ -130,9 +130,11 @@ function circle()
 								var confirmationKey = $('.mobileconf_list_entry:eq(0)', data).attr('data-key'); //get on the conf page
 								if(confirmationKey)
 								{
+									console.log('confirmationKey: ' + confirmationKey);
 									chrome.tabs.create({ url : confpage, selected : false}, function(tab)
 									{
-										localStorage.setItem('tabidremove', tab.id);
+										console.log('g_tabidremove: ' + g_tabidremove);
+										g_tabidremove = tab.id;
 									});
 								}
 								else
@@ -177,10 +179,17 @@ function circle()
 
 chrome.tabs.onRemoved.addListener( function(tabId, removeInfo)
 {
-	var truetabid = localStorage.getItem('tabidremove');
-	localStorage.removeItem('tabidremove');
-	if (tabId == truetabid)
-		setTimeout(circle, localStorage.getItem('rate'));
+	try
+	{
+		var truetabid = g_tabidremove;
+		if(tabId == truetabid)
+		{
+			console.log('truetabid: ' + truetabid);
+			setTimeout(circle, localStorage.getItem('rate'));
+			g_tabidremove = null;
+		}
+	} 
+	catch(err) { }
 });
 
 function makeRandomString(numb)
